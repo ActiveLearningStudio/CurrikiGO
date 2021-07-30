@@ -90,6 +90,11 @@ class ParamValidate
     }
 
     public static function getKeyInCustomFields($session, $key) {
+        if(isset($session['lti_post']['lti_version']) && $session['lti_post']['lti_version'] == "LTI-1p0")
+        {
+            $key = !empty($key) ? 'custom_'.$key : null;
+            return $session['lti_post'][$key];
+        }
         $custom_fields = self::getCustomFieldsInfo($session);
         return ($custom_fields && property_exists($custom_fields, $key)) ? $custom_fields->{$key} : null;
     }
