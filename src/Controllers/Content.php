@@ -79,6 +79,8 @@ class Content implements ControllerInterface
             $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$oauth_consumer_key.'/'.urlencode($redirect_url);
             if (!empty($custom_email_id)) {
                 $studio_url .= '?user_email=' . urlencode($custom_email_id);
+            } else{
+                var_dump("You need to set 'person_email_primary' key in external tool settings!"); die;
             }
             $response = new RedirectResponse($studio_url);
             $response->send();
