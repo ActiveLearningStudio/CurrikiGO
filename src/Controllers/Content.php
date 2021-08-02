@@ -80,7 +80,7 @@ class Content implements ControllerInterface
             if (!empty($custom_email_id)) {
                 $studio_url .= '?user_email=' . urlencode($custom_email_id);
             } else{
-                var_dump("You need to set 'person_email_primary' key in external tool settings!"); die;
+                die("You need to set 'person_email_primary' key in external tool settings!");
             }
             $response = new RedirectResponse($studio_url);
             $response->send();
