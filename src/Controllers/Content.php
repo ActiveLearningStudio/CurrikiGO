@@ -86,7 +86,7 @@ class Content implements ControllerInterface
             $response->send();
         }elseif ( isset($_SESSION['lti']['issuer_client']) ) {
             $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
-            if ( isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] == "testing_plc" ) {
+            if ( isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] == "canvas_sso" ) {
                 $user_data = array();
                 $user_data['email'] = $custom_email_id;
                 $user_data['first_name'] = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_given');
