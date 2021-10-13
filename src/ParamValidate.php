@@ -101,7 +101,7 @@ class ParamValidate
         return ($custom_fields && property_exists($custom_fields, $key)) ? $custom_fields->{$key} : null;
     }
 
-    public static function toolPlatformElement($session,$element='')
+    public static function toolPlatformElement($session, $element='')
     {
         if (isset($session['tsugi_jwt'])) {
             $lti_jwt = $session['tsugi_jwt'];
