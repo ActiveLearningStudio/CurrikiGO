@@ -41,6 +41,14 @@ class App
             $custom_person_name_family = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_family');
             $issuer_client = $_SESSION['lti']['issuer_client'];
 
+            $lti_version = $LTI->ltiRawParameter(LTIConstants::LTI_VERSION, false);
+            if ($lti_version === LTIConstants::LTI_VERSION_1) {
+                $custom_email_id = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY, false);
+                $custom_person_name_given = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_NAME_FAMILY, false);
+                $custom_person_name_family = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_NAME_GIVEN, false);
+                $custom_course_id =  $LTI->ltiRawParameter("context_id", false);
+                $custom_course_code =  $LTI->ltiRawParameter("custom_course_code", false);
+            }
             // $LTI->var_dump();
             // Obtain User ID
             $user_id = $LTI->user->id; //TSUGI member ID
