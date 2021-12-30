@@ -48,7 +48,6 @@ class App
                 $custom_person_name_family = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_NAME_GIVEN, false);
                 $custom_course_id =  $LTI->ltiRawParameter("context_id", false);
                 $custom_course_code =  $LTI->ltiRawParameter("custom_course_code", false);
-                $custom_email_id = "Testing...";
             }
             // $LTI->var_dump();
             // Obtain User ID
