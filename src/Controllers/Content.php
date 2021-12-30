@@ -86,7 +86,7 @@ class Content implements ControllerInterface
             $response = new RedirectResponse($studio_url);
             $response->send();
         }elseif ( isset($_SESSION['lti']['issuer_client']) ) {
-            $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
+            $custom_email_id = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY, false);
             if (isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] === 'canvas_sso') {
                 $user_data = [];
                 $user_data['email'] = $custom_email_id;
