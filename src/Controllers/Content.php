@@ -71,6 +71,7 @@ class Content implements ControllerInterface
         $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
         if($custom_email_id === "\$Person.email.primary" || empty($custom_email_id || !strpos($custom_email_id, '@'))){
             $custom_email_id = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY, false);
+            echo '1-';
         }
         if ( isset($_SESSION['lti_post']['lti_version']) && $_SESSION['lti_post']['lti_version'] === 'LTI-1p0' ) {
             // handle LTI 1.0
@@ -81,6 +82,7 @@ class Content implements ControllerInterface
                         .'://'.parse_url($content_item_return_url, PHP_URL_HOST).$port;
             
             $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$oauth_consumer_key.'/'.urlencode($redirect_url);
+            echo $custom_email_id;
             if (!empty($custom_email_id)) {
                 $studio_url .= '?user_email=' . urlencode($custom_email_id);
             } else{
@@ -89,6 +91,7 @@ class Content implements ControllerInterface
             $response = new RedirectResponse($studio_url);
             $response->send();
         }elseif ( isset($_SESSION['lti']['issuer_client']) ) {
+            echo '-2-';
             if (isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] === 'canvas_sso') {
                 $user_data = [];
                 $user_data['email'] = $custom_email_id;
