@@ -68,10 +68,9 @@ class Content implements ControllerInterface
         $redirect_url = $CFG->apphome.'/mod/curriki/content/processtolms';
         $redirect_url = U::add_url_parm($redirect_url, 'PHPSESSID', session_id());
 
-        // $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
-        $custom_email_id = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY, false);
         if ( isset($_SESSION['lti_post']['lti_version']) && $_SESSION['lti_post']['lti_version'] === 'LTI-1p0' ) {
             // handle LTI 1.0
+            $custom_email_id = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY, false);
             $oauth_consumer_key = $_SESSION['lti_post']['oauth_consumer_key'];
             $content_item_return_url = isset($_SESSION['lti_post']['content_item_return_url']) ? $_SESSION['lti_post']['content_item_return_url'] : $_SESSION['lti_post']['tool_consumer_instance_url'];
             $port = parse_url($content_item_return_url, PHP_URL_PORT) ? ':'.parse_url($content_item_return_url, PHP_URL_PORT):'';
@@ -87,6 +86,7 @@ class Content implements ControllerInterface
             $response = new RedirectResponse($studio_url);
             $response->send();
         }elseif ( isset($_SESSION['lti']['issuer_client']) ) {
+            $custom_email_id = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY, false);
             if (isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] === 'canvas_sso') {
                 $user_data = [];
                 $user_data['email'] = $custom_email_id;
