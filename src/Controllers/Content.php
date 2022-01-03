@@ -71,8 +71,8 @@ class Content implements ControllerInterface
         if ( isset($_SESSION['lti_post']['lti_version']) && $_SESSION['lti_post']['lti_version'] === 'LTI-1p0' ) {
             // handle LTI 1.0
             $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
-            if (empty($custom_email_id)) {
-                $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY);
+            if (empty($custom_email_id) && isset($_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY])) {
+                $custom_email_id = $_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY];
             }
             $oauth_consumer_key = $_SESSION['lti_post']['oauth_consumer_key'];
             $content_item_return_url = isset($_SESSION['lti_post']['content_item_return_url']) ? $_SESSION['lti_post']['content_item_return_url'] : $_SESSION['lti_post']['tool_consumer_instance_url'];
