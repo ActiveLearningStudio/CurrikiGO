@@ -89,12 +89,22 @@ class Content implements ControllerInterface
             $response = new RedirectResponse($studio_url);
             $response->send();
         }elseif ( isset($_SESSION['lti']['issuer_client']) ) {
-            $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
+            if ( isset($_SESSION['lti']['user_email']) ){
+                $full_name = $_SESSION['lti']['user_displayname'];
+                $first_name = $full_name[0];
+                $last_name = $full_name[1];
+                $custom_email_id = $_SESSION['lti']['user_email'];
+            }
+            else{
+                $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
+                $first_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_given');
+                $last_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_family');
+            }
             if (isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] === 'canvas_sso') {
                 $user_data = [];
                 $user_data['email'] = $custom_email_id;
-                $user_data['first_name'] = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_given');
-                $user_data['last_name'] = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_family');
+                $user_data['first_name'] = $first_name;
+                $user_data['last_name'] = $last_name;
                 $user_data['lti_client_id'] = $_SESSION['lti']['issuer_client'];
                 $user_data['tool_platform'] = ParamValidate::toolPlatformInfo($_SESSION);
                 $user_data['guid'] = ParamValidate::toolPlatformElement($_SESSION, 'guid');
