@@ -88,18 +88,18 @@ class Content implements ControllerInterface
             }
             $response = new RedirectResponse($studio_url);
             $response->send();
-        }elseif (isset($_SESSION['lti']['issuer_client'])) {
+        } elseif (isset($_SESSION['lti']['issuer_client'])) {
             if (isset($_SESSION['lti']['user_email']) && !empty($_SESSION['lti']['user_email'])) {
-                $custom_email_id = isset($_SESSION['lti']['user_email']);
+                $custom_email_id = $_SESSION['lti']['user_email'];
                 $full_name = explode(" ", $_SESSION['lti']['user_displayname']);
                 if (count($full_name) > 1) {
                     $last_name = array_pop($full_name);
                     $first_name = implode(" ", $full_name);
-                }else {
+                } else {
                     $first_name = $full_name;
                     $last_name = " ";
                 }
-            }else {
+            } else {
                 $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
                 $first_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_given');
                 $last_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_family');
