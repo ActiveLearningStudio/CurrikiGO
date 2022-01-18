@@ -90,9 +90,16 @@ class Content implements ControllerInterface
             $response->send();
         }elseif ( isset($_SESSION['lti']['issuer_client']) ) {
             if ( isset($_SESSION['lti']['user_email']) ){
-                $full_name = $_SESSION['lti']['user_displayname'];
-                $first_name = $full_name[0];
-                $last_name = $full_name[1];
+                $full_name = explode(" ", $_SESSION['lti']['user_displayname']);
+                if(count($full_name) > 1) {
+                    $last_name = array_pop($full_name);
+                    $first_name = implode(" ", $full_name);
+                }
+                else
+                {
+                    $first_name = $full_name;
+                    $last_name = " ";
+                }
                 $custom_email_id = $_SESSION['lti']['user_email'];
             }
             else{
