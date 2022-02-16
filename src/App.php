@@ -89,11 +89,11 @@ class App
                     }
                     else {
                         $grade_params['issuer_client'] = $lti_data['issuer_client'];
-                        $grade_params['lti13_privkey'] = $lti_data['lti13_privkey'];
+                        $grade_params['lti13_privkey'] = $lti_data['lti13_privkey'] ?: '';
                         $grade_params['lti13_lineitem'] = $lti_data['lti13_lineitem'];
                         $grade_params['lti13_token_url'] = $lti_data['lti13_token_url'];
                         $grade_params['lti13_token_audience'] = $lti_data['lti13_token_audience'];
-                        $grade_params['lti13_pubkey'] = $lti_data['lti13_pubkey'];
+                        $grade_params['lti13_pubkey'] = $lti_data['lti13_pubkey'] ?: '';
                         $grade_params['lti13_subject_key'] = $lti_data['subject_key'];
                         $grade_params['note'] = "You've been graded.";
                         $grade_params['result_id'] = $lti_data['result_id'];
