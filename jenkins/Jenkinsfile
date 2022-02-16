@@ -7,8 +7,9 @@ node("currikidev") {
     }  
     
     stage('Build image') {     
+        sh 'rm -rf /tmp/tsugi && rm -rf /tmp/tsugi/mod/curriki'
         sh 'git clone https://github.com/ActiveLearningStudio/tsugi-1 /tmp/tsugi'
-        sh 'git clone https://github.com/ActiveLearningStudio/CurrikiGO.git /tmp/tsugi/mod/curriki'
+        sh 'git clone https://github.com/ActiveLearningStudio/CurrikiGO.git -b /tmp/tsugi/mod/curriki'
         sh "yes | cp /tmp/tsugi/mod/curriki/Dockerfile /tmp/tsugi/Dockerfile"
         sh "yes | cp /tmp/tsugi/mod/curriki/php.ini /tmp/tsugi/php.ini"
         sh "yes | cp /tmp/tsugi/mod/curriki/tsugi.conf /tmp/tsugi/tsugi.conf"
