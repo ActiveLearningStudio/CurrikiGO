@@ -71,6 +71,10 @@ class Content implements ControllerInterface
         if ( isset($_SESSION['lti_post']['lti_version']) && $_SESSION['lti_post']['lti_version'] === 'LTI-1p0' ) {
             // handle LTI 1.0
             $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
+            // courseId and domain params added to achieve lrs data entry in gclass_api_data table
+            $course_id = ParamValidate::getKeyInCustomFields($_SESSION, 'course_id');
+            $api_domain_url = ParamValidate::getKeyInCustomFields($_SESSION, 'api_domain_url');
+
             if (empty($custom_email_id) && isset($_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY])) {
                 $custom_email_id = $_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY];
             }
@@ -80,7 +84,7 @@ class Content implements ControllerInterface
             $lms_url = parse_url($content_item_return_url, PHP_URL_SCHEME)
                         .'://'.parse_url($content_item_return_url, PHP_URL_HOST).$port;
             
-            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$oauth_consumer_key.'/'.urlencode($redirect_url);
+            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$oauth_consumer_key.'/'.urlencode($redirect_url).'/'.$course_id.'/'.$api_domain_url;
             if (!empty($custom_email_id)) {
                 $studio_url .= '?user_email=' . urlencode($custom_email_id);
             } else{
@@ -129,7 +133,11 @@ class Content implements ControllerInterface
             $lms_url = parse_url($lti13_deeplink->deep_link_return_url, PHP_URL_SCHEME)
                         .'://'.parse_url($lti13_deeplink->deep_link_return_url, PHP_URL_HOST).$port;
             
-            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$lti_client_id.'/'.urlencode($redirect_url);
+            // courseId and domain params added to achieve lrs data entry in gclass_api_data table
+            $course_id = ParamValidate::getKeyInCustomFields($_SESSION, 'course_id');
+            $api_domain_url = ParamValidate::getKeyInCustomFields($_SESSION, 'api_domain_url');
+
+            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$lti_client_id.'/'.urlencode($redirect_url).'/'.$course_id.'/'.$api_domain_url;
             if (!empty($custom_email_id)) {
                 $studio_url .= '?user_email=' . urlencode($custom_email_id);
             }
