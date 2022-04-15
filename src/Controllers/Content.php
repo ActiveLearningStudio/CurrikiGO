@@ -84,9 +84,9 @@ class Content implements ControllerInterface
             $lms_url = parse_url($content_item_return_url, PHP_URL_SCHEME)
                         .'://'.parse_url($content_item_return_url, PHP_URL_HOST).$port;
             
-            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$oauth_consumer_key.'/'.urlencode($redirect_url).'&course_id='.$course_id.'&api_domain_url='.$api_domain_url;
+            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$oauth_consumer_key.'/'.urlencode($redirect_url);
             if (!empty($custom_email_id)) {
-                $studio_url .= '?user_email=' . urlencode($custom_email_id);
+                $studio_url .= '?user_email=' . urlencode($custom_email_id).'&course_id='.$course_id.'&api_domain_url='.$api_domain_url;
             } else{
                 die("You need to set 'person_email_primary' key in external tool settings!");
             }
@@ -137,9 +137,9 @@ class Content implements ControllerInterface
             $course_id = ParamValidate::getKeyInCustomFields($_SESSION, 'course_id');
             $api_domain_url = ParamValidate::getKeyInCustomFields($_SESSION, 'api_domain_url');
 
-            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$lti_client_id.'/'.urlencode($redirect_url).'&course_id='.$course_id.'&api_domain_url='.$api_domain_url;
+            $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$lti_client_id.'/'.urlencode($redirect_url);
             if (!empty($custom_email_id)) {
-                $studio_url .= '?user_email=' . urlencode($custom_email_id);
+                $studio_url .= '?user_email=' . urlencode($custom_email_id).'&course_id='.$course_id.'&api_domain_url='.$api_domain_url;
             }
             $response = new RedirectResponse($studio_url);
             $response->send();
