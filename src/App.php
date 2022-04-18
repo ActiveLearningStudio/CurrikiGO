@@ -89,11 +89,11 @@ class App
                     }
                     else {
                         $grade_params['issuer_client'] = $lti_data['issuer_client'];
-                        $grade_params['lti13_privkey'] = $lti_data['lti13_privkey'];
+                        $grade_params['lti13_privkey'] = $lti_data['lti13_privkey'] ?: '';
                         $grade_params['lti13_lineitem'] = $lti_data['lti13_lineitem'];
                         $grade_params['lti13_token_url'] = $lti_data['lti13_token_url'];
                         $grade_params['lti13_token_audience'] = $lti_data['lti13_token_audience'];
-                        $grade_params['lti13_pubkey'] = $lti_data['lti13_pubkey'];
+                        $grade_params['lti13_pubkey'] = $lti_data['lti13_pubkey'] ?: '';
                         $grade_params['lti13_subject_key'] = $lti_data['subject_key'];
                         $grade_params['note'] = "You've been graded.";
                         $grade_params['result_id'] = $lti_data['result_id'];
@@ -110,9 +110,9 @@ class App
 
                     // encode user information.
                     $lti_submission_info = base64_encode($build_review_data);
-
+                    $extra = false;
                     if (isset($_SESSION['lti']['issuer_client'])) {
-                        $grade_params['lti13_extra'] = [
+                        $extra = [
                             'https://canvas.instructure.com/lti/submission' => [
                                 "new_submission" => true,
                                 "submission_type" => "basic_lti_launch",
@@ -126,7 +126,7 @@ class App
                     // if you don't know the data to send when creating the response
                     $response = new JsonResponse();
                     $debug_log = [];
-                    $retval = $LTI->result->gradeSend($gradetosend, $grade_params, $debug_log);
+                    $retval = $LTI->result->gradeSend($gradetosend, $grade_params, $debug_log, $extra);
                     $_SESSION['debug_log'] = $debug_log;
                     $output = '';
                     if ($retval === true) {
