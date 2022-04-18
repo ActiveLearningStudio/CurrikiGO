@@ -39,7 +39,7 @@ node("currikidev") {
                     node("${node}") {
                         stage ("${node}") {
                                 echo 'Copy'
-                                sh "yes | docker service update --image quay.io/curriki/tsugi:${tag} currikistack_currikiprod-tsugi-git" 
+                                sh "yes | docker service update --image quay.io/curriki/tsugi:${tag} currikistack_currikiprod-tsugi" 
                                 echo 'Copy completed'
                         }
                     }
