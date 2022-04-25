@@ -170,7 +170,12 @@ class App
                     'custom_person_name_family'
                 );
                 foreach($custom_variable_array as $extra_param) {
-                    $redirect_to_studio_url .= '&' . $extra_param . '=' . urlencode($$extra_param);
+                    // Making isLearner hardcode 1 so that GPB work for both teacher & student
+                    if ($extra_param === 'is_learner') {
+                        $redirect_to_studio_url .= '&' . $extra_param . '=' . 1;
+                    } else {
+                        $redirect_to_studio_url .= '&' . $extra_param . '=' . urlencode($$extra_param);
+                    }
                 }
                 $redirect_to_studio_url .= '&homepage=' . urlencode($CFG->wwwroot);
                 $redirect_to_studio_url = addSession($redirect_to_studio_url);
