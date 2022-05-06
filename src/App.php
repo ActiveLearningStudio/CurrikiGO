@@ -137,7 +137,7 @@ class App
                         //$output = $scorestr;
                     } elseif (is_string($retval)) {
                         $_SESSION['error'] = "Grade not sent: " . $retval;
-                        $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+                        $response->setStatusCode(Response::HTTP_ACCEPTED);
 
                         $response->setData(['errors' => ["Grade not sent: " . $retval]]);
                         $output = $_SESSION['error'];
