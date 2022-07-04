@@ -108,6 +108,7 @@ class Content implements ControllerInterface
                 $first_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_given');
                 $last_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_family');
             }
+            $course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
             if (isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] === 'canvas_sso') {
                 $user_data = [];
                 $user_data['email'] = $custom_email_id;
@@ -139,7 +140,7 @@ class Content implements ControllerInterface
 
             $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$lti_client_id.'/'.urlencode($redirect_url);
             if (!empty($custom_email_id)) {
-                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url);
+                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url) . 'course_name=' . $course_name;
             }
             $response = new RedirectResponse($studio_url);
             $response->send();
