@@ -77,6 +77,7 @@ class Content implements ControllerInterface
             // courseId and domain params added to achieve lrs data entry in gclass_api_data table
             $course_id = ParamValidate::getKeyInCustomFields($_SESSION, 'course_id');
             $api_domain_url = ParamValidate::getKeyInCustomFields($_SESSION, 'api_domain_url');
+            $course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
 
             if (empty($custom_email_id) && isset($_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY])) {
                 $custom_email_id = $_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY];
@@ -89,8 +90,8 @@ class Content implements ControllerInterface
 
             $studio_url = CURRIKI_STUDIO_HOST . '/lti/content/' . urlencode($lms_url) . '/' . $oauth_consumer_key . '/' . urlencode($redirect_url);
             if (!empty($custom_email_id)) {
-                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url);
-            } else {
+                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url)  . '&course_name=' . urlencode($course_name);
+            } else{
                 die("You need to set 'person_email_primary' key in external tool settings!");
             }
             $response = new RedirectResponse($studio_url);
@@ -110,6 +111,7 @@ class Content implements ControllerInterface
                 $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
                 $first_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_given');
                 $last_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_family');
+                $course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
             }
             if (isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] === 'canvas_sso') {
                 $user_data = [];
@@ -142,7 +144,7 @@ class Content implements ControllerInterface
 
             $studio_url = CURRIKI_STUDIO_HOST . '/lti/content/' . urlencode($lms_url) . '/' . $lti_client_id . '/' . urlencode($redirect_url);
             if (!empty($custom_email_id)) {
-                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url);
+                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url) . '&course_name=' . urlencode($course_name);
             }
             $response = new RedirectResponse($studio_url);
             $response->send();

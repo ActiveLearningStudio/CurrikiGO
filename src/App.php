@@ -195,7 +195,7 @@ class App
                         $output = $_SESSION['error'];
                     } else {
                         // $output = "<pre>\n" . print_r($retval, true) . "</pre>\n";
-                        $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+                        $response->setStatusCode(Response::HTTP_ACCEPTED);
                         $response->setData(['errors' => ["Grade not sent."]]);
                     }
 
