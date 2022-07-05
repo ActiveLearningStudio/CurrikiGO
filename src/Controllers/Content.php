@@ -87,7 +87,7 @@ class Content implements ControllerInterface
             
             $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$oauth_consumer_key.'/'.urlencode($redirect_url);
             if (!empty($custom_email_id)) {
-                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url)  . '&course_name=' . $course_name;
+                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url)  . '&course_name=' . urlencode($course_name);
             } else{
                 die("You need to set 'person_email_primary' key in external tool settings!");
             }
@@ -141,7 +141,7 @@ class Content implements ControllerInterface
 
             $studio_url = CURRIKI_STUDIO_HOST.'/lti/content/'.urlencode($lms_url).'/'.$lti_client_id.'/'.urlencode($redirect_url);
             if (!empty($custom_email_id)) {
-                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url) . '&course_name=' . $course_name;
+                $studio_url .= '?user_email=' . urlencode($custom_email_id) . '&course_id=' . $course_id . '&api_domain_url=' . urlencode($api_domain_url) . '&course_name=' . urlencode($course_name);
             }
             $response = new RedirectResponse($studio_url);
             $response->send();
