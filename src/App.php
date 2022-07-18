@@ -1,5 +1,7 @@
 <?php
+
 namespace CurrikiTsugi;
+
 use Tsugi\Core\LTIX;
 use \Tsugi\Core\Result;
 use \Tsugi\Util\U;
@@ -8,30 +10,31 @@ use \Tsugi\Grades\GradeUtil;
 use CurrikiTsugi\Interfaces\ControllerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
+use \Firebase\JWT\JWT;
 class App
 {
     public $controller;
 
-    public function __construct(ControllerInterface $controller = null) {        
+    public function __construct(ControllerInterface $controller = null)
+    {
         $this->controller = $controller;
-    }   
-    
+    }
+
     public function bootstrap()
-    {        
-        global $LTI, $CFG;
-        
+    {
+        global $LTI, $CFG, $PDOX;
+
         if (!is_null($this->controller)) {
-            global $path_info_parts;            
+            global $path_info_parts;
             //execute controller instead LTI Launch - also set controller action
             if (isset($path_info_parts[1]) && method_exists($this->controller, $path_info_parts[1])) {
                 call_user_func(array($this->controller, $path_info_parts[1]));
             } else {
                 call_user_func(array($this->controller, 'index'));
-            }            
+            }
         } else {
             $LTI = LTIX::requireData();
-           
+
             $course_id = ParamValidate::getKeyInCustomFields($_SESSION, 'course_id');
             $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
             $custom_course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
@@ -64,6 +67,7 @@ class App
             $playlist_id = ParamValidate::playlistInCustom($_SESSION) ?: ParamValidate::playlistInQueryString($_SESSION);
             $project_id = ParamValidate::projectInCustom($_SESSION) ?: ParamValidate::projectInQueryString($_SESSION);
             $activity_id = ParamValidate::activityInCustom($_SESSION) ?: ParamValidate::activityInQueryString($_SESSION);
+            $is_summary = U::get($_GET, "is_summary");
             if ($project_id) {
                 $lti_token_params = http_build_query($_SESSION['lti_post']);
                 $project_studio_link = CURRIKI_STUDIO_HOST . "/project/preview2/$project_id";
@@ -74,20 +78,68 @@ class App
                 $playlist_studio_link = CURRIKI_STUDIO_HOST . "/playlist/$playlist_id/preview/lti";
                 $redirect_to_studio_url = $playlist_studio_link . "?" . $lti_token_params;
                 header("Location: $redirect_to_studio_url");
-            } elseif ($activity_id) { 
+            } elseif ($activity_id && $is_summary != 1) {
+                // [start]===== Open Summary Page for Moodle ========
+                $state = isset($_SESSION["lti_post"]["state"]) && count(explode('.', $_SESSION["lti_post"]["state"])) > 2 ? explode('.', $_SESSION["lti_post"]["state"])[1] : null;
+                $stateObj = $state ? JWT::jsonDecode(JWT::urlsafeB64Decode($state)) : null;
+                $stateTargetLinkUri = is_object($stateObj) && property_exists($stateObj, "target_link_uri") ? $stateObj->target_link_uri : null;
+                $stateTargetLinkUriQuery = $stateTargetLinkUri ? parse_url($stateTargetLinkUri, PHP_URL_QUERY) : null;
+                parse_str($stateTargetLinkUriQuery, $stateTargetLinkUriQueryParams);
+                // if LTI state token has is_summary param
+                if ($_SESSION["tsugi_jwt"]->body->{"https://purl.imsglobal.org/spec/lti/claim/tool_platform"}->product_family_code === "moodle" && array_key_exists("is_summary", $stateTargetLinkUriQueryParams)) {
+                    $lti_data = $LTI->ltiParameterArray();
+                    $review_data = [];
+                    $review_data['result_id'] = $lti_data['result_id'];
+                    $review_data['activity_id'] = $activity_id;
+                    $review_data['user_id'] = $LTI->user->id;
+                    $build_review_data = http_build_query($review_data);
+                    $lti_submission_info = base64_encode($build_review_data);
+                    $summaryLtiLink = $CFG->wwwroot . '/mod/curriki/?submission=' . $lti_submission_info;
+                    if (!U::get($_GET, "submission")) {
+                        // Launch LTI Summary Page link
+                        header("Location: " . U::add_url_parm($summaryLtiLink, 'PHPSESSID', session_id()));
+                        exit(0);
+                    } else if (U::get($_GET, "submission")) {
+                        // redirect to CurrikiStudio Summary page
+                        $student_id = $stateTargetLinkUriQueryParams["student_id"];
+                        $sql = "SELECT * FROM lti_user WHERE subject_key = '{$student_id}' LIMIT 1";
+                        $student_data = $PDOX->allRowsDie($sql);
+                        if (count($student_data) > 0) {
+                            $student_pk_id = $student_data[0]['user_id'];
+                        }
+
+                        $student_result = "SELECT * FROM lti_result WHERE user_id = {$student_pk_id} AND link_id = {$_SESSION['lti']['link_id']} ORDER BY created_at DESC LIMIT 1";
+                        $student_result = $PDOX->allRowsDie($student_result);
+                        $result_id = $student_result[0]['result_id'];
+                        $is_submission_review = base64_encode("result_id={$result_id}&activity_id={$activity_id}&user_id={$student_pk_id}");
+                        //$is_submission_review = U::get($_GET, "submission");
+                        if (!empty($is_submission_review)) {
+
+                            parse_str(base64_decode($is_submission_review), $submission_data);
+                            $submission_data['referrer'] = $CFG->wwwroot;
+                            $build_submission_request_data = http_build_query($submission_data);
+
+                            // encode user information.
+                            $lti_summary_info = base64_encode($build_submission_request_data);
+                            $studio_lti_summary_link = CURRIKI_STUDIO_HOST . "/lti/summary?submission=$lti_summary_info";
+                            // Redirect User to the login page.
+                            header("Location: $studio_lti_summary_link");
+                            exit(0);
+                        }
+                    }
+                }
                 // Check if the grade is being passedback
                 $is_gradepassback = (int) U::get($_GET, "gpb");
                 if ($is_gradepassback) {
                     $gradetosend = U::get($_GET, 'final_grade') * 1.0;
                     $scorestr = "Your score of " . sprintf("%.2f%%", $gradetosend * 100) . " has been saved.";
-                   
+
                     $lti_data = $LTI->ltiParameterArray();
                     if (isset($_SESSION['lti_post']['lti_version']) && $_SESSION['lti_post']['lti_version'] == "LTI-1p0") {
                         $grade_params = $lti_data;
                         $grade_params['note'] = "You've been graded.";
                         $grade_params['result_id'] = $lti_data['result_id'];
-                    }
-                    else {
+                    } else {
                         $grade_params['issuer_client'] = $lti_data['issuer_client'];
                         $grade_params['lti13_privkey'] = $lti_data['lti13_privkey'] ?: '';
                         $grade_params['lti13_lineitem'] = $lti_data['lti13_lineitem'];
@@ -105,7 +157,7 @@ class App
                     $review_data['result_id'] = $lti_data['result_id'];
                     $review_data['activity_id'] = $activity_id;
                     $review_data['user_id'] = $user_id;
-                    
+
                     $build_review_data = http_build_query($review_data);
 
                     // encode user information.
@@ -121,7 +173,7 @@ class App
                             ]
                         ];
                     }
-                    
+
                     // Use LTIX to send the grade back to the LMS.
                     // if you don't know the data to send when creating the response
                     $response = new JsonResponse();
@@ -169,7 +221,7 @@ class App
                     'custom_person_name_given',
                     'custom_person_name_family'
                 );
-                foreach($custom_variable_array as $extra_param) {
+                foreach ($custom_variable_array as $extra_param) {
                     $redirect_to_studio_url .= '&' . $extra_param . '=' . urlencode($$extra_param);
                 }
                 $redirect_to_studio_url .= '&homepage=' . urlencode($CFG->wwwroot);
@@ -179,7 +231,7 @@ class App
                 // LTI Submission Review - Canvas' Score API implementation
                 $is_submission_review = U::get($_GET, "submission");
                 if (!empty($is_submission_review)) {
-                    
+
                     parse_str(base64_decode($is_submission_review), $submission_data);
                     $submission_data['referrer'] = $CFG->wwwroot;
                     $build_submission_request_data = http_build_query($submission_data);
@@ -187,19 +239,19 @@ class App
                     // encode user information.
                     $lti_summary_info = base64_encode($build_submission_request_data);
                     $studio_lti_summary_link = CURRIKI_STUDIO_HOST . "/lti/summary?submission=$lti_summary_info";
-                    
+
                     // Redirect User to the login page.
                     header("Location: $studio_lti_summary_link");
                     exit(0);
                 }
                 // Single Sign On LTI request
                 // we should move this to a new 
-                $lti_data = $LTI->ltiParameterArray();    
+                $lti_data = $LTI->ltiParameterArray();
                 $request_data = [];
                 foreach (['user_key', 'user_email', 'user_displayname'] as $param) {
                     $request_data[$param] = $lti_data[$param];
-                }  
-                
+                }
+
                 $first_name = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_NAME_FAMILY, false);
                 $last_name = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_NAME_GIVEN, false);
                 $person_sourcedid = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_SOURCEDID, false);
@@ -221,12 +273,11 @@ class App
                 // encode user information.
                 $lti_user_info = base64_encode($build_request_data);
                 $studio_login_link = CURRIKI_STUDIO_HOST . "/lti-sso?sso_info=$lti_user_info";
-                
+
                 // Redirect User to the login page.
                 header("Location: $studio_login_link");
                 exit(0);
             }
-
         }
     }
 }
