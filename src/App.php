@@ -90,7 +90,7 @@ class App
                         // Launch LTI Summary Page link
                         header("Location: " . U::add_url_parm($summaryLtiLink, 'PHPSESSID', session_id()));
                         exit(0);
-                    } else if (U::get($_GET, "is_submission_review")) {
+                    } elseif (U::get($_GET, "is_submission_review")) {
                         // redirect to CurrikiStudio Summary page
                         $lti_data = $LTI->ltiParameterArray();
                         $student_id = $_SESSION["tsugi_jwt"]->body->{"https://purl.imsglobal.org/spec/lti/claim/custom"}->student_id;
