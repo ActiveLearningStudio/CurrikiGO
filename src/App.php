@@ -10,7 +10,6 @@ use \Tsugi\Grades\GradeUtil;
 use CurrikiTsugi\Interfaces\ControllerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use \Firebase\JWT\JWT;
 
 class App
 {
