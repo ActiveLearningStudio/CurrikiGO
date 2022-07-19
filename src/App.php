@@ -11,6 +11,7 @@ use CurrikiTsugi\Interfaces\ControllerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use \Firebase\JWT\JWT;
+
 class App
 {
     public $controller;
@@ -80,41 +81,33 @@ class App
                 header("Location: $redirect_to_studio_url");
             } elseif ($activity_id && $is_summary != 1) {
                 // [start]===== Open Summary Page for Moodle ========
-                $state = isset($_SESSION["lti_post"]["state"]) && count(explode('.', $_SESSION["lti_post"]["state"])) > 2 ? explode('.', $_SESSION["lti_post"]["state"])[1] : null;
-                $stateObj = $state ? JWT::jsonDecode(JWT::urlsafeB64Decode($state)) : null;
-                $stateTargetLinkUri = is_object($stateObj) && property_exists($stateObj, "target_link_uri") ? $stateObj->target_link_uri : null;
-                $stateTargetLinkUriQuery = $stateTargetLinkUri ? parse_url($stateTargetLinkUri, PHP_URL_QUERY) : null;
-                parse_str($stateTargetLinkUriQuery, $stateTargetLinkUriQueryParams);
-                // if LTI state token has is_summary param
-                if ($_SESSION["tsugi_jwt"]->body->{"https://purl.imsglobal.org/spec/lti/claim/tool_platform"}->product_family_code === "moodle" && array_key_exists("is_summary", $stateTargetLinkUriQueryParams)) {
-                    $lti_data = $LTI->ltiParameterArray();
-                    $review_data = [];
-                    $review_data['result_id'] = $lti_data['result_id'];
-                    $review_data['activity_id'] = $activity_id;
-                    $review_data['user_id'] = $LTI->user->id;
-                    $build_review_data = http_build_query($review_data);
-                    $lti_submission_info = base64_encode($build_review_data);
-                    $summaryLtiLink = $CFG->wwwroot . '/mod/curriki/?submission=' . $lti_submission_info;
-                    if (!U::get($_GET, "submission")) {
+                $isMoodleSummaryPage = property_exists($_SESSION["tsugi_jwt"]->body->{"https://purl.imsglobal.org/spec/lti/claim/custom"}, 'is_summary')
+                    && property_exists($_SESSION["tsugi_jwt"]->body->{"https://purl.imsglobal.org/spec/lti/claim/custom"}, 'student_id')
+                    && $_SESSION["tsugi_jwt"]->body->{"https://purl.imsglobal.org/spec/lti/claim/tool_platform"}->product_family_code === "moodle";
+                if ($isMoodleSummaryPage) {
+                    $summaryLtiLink = $CFG->wwwroot . '/mod/curriki/?is_submission_review=true';
+                    if (!U::get($_GET, "is_submission_review")) {
                         // Launch LTI Summary Page link
                         header("Location: " . U::add_url_parm($summaryLtiLink, 'PHPSESSID', session_id()));
                         exit(0);
-                    } else if (U::get($_GET, "submission")) {
+                    } else if (U::get($_GET, "is_submission_review")) {
                         // redirect to CurrikiStudio Summary page
-                        $student_id = $stateTargetLinkUriQueryParams["student_id"];
+                        $lti_data = $LTI->ltiParameterArray();
+                        $student_id = $_SESSION["tsugi_jwt"]->body->{"https://purl.imsglobal.org/spec/lti/claim/custom"}->student_id;
+                        $result_id = $lti_data['result_id'];
+
+                        // $student_id = U::get($_GET, "student_id");
                         $sql = "SELECT * FROM lti_user WHERE subject_key = '{$student_id}' LIMIT 1";
                         $student_data = $PDOX->allRowsDie($sql);
                         if (count($student_data) > 0) {
                             $student_pk_id = $student_data[0]['user_id'];
                         }
-
                         $student_result = "SELECT * FROM lti_result WHERE user_id = {$student_pk_id} AND link_id = {$_SESSION['lti']['link_id']} ORDER BY created_at DESC LIMIT 1";
                         $student_result = $PDOX->allRowsDie($student_result);
-                        $result_id = $student_result[0]['result_id'];
-                        $is_submission_review = base64_encode("result_id={$result_id}&activity_id={$activity_id}&user_id={$student_pk_id}");
-                        //$is_submission_review = U::get($_GET, "submission");
-                        if (!empty($is_submission_review)) {
+                        $result_id_x = $student_result[0]['result_id'];
+                        $is_submission_review = base64_encode("result_id={$result_id_x}&activity_id={$activity_id}&user_id={$student_pk_id}");
 
+                        if (!empty($is_submission_review)) {
                             parse_str(base64_decode($is_submission_review), $submission_data);
                             $submission_data['referrer'] = $CFG->wwwroot;
                             $build_submission_request_data = http_build_query($submission_data);
@@ -229,7 +222,19 @@ class App
                 header("Location: $redirect_to_studio_url");
             } else {
                 // LTI Submission Review - Canvas' Score API implementation
-                $is_submission_review = U::get($_GET, "submission");
+                $student_id = U::get($_GET, "student_id");
+                $sql = "SELECT * FROM lti_user WHERE subject_key = '{$student_id}' LIMIT 1";
+                $student_data = $PDOX->allRowsDie($sql);
+                if (count($student_data) > 0) {
+                    $student_pk_id = $student_data[0]['user_id'];
+                }
+
+                $student_result = "SELECT * FROM lti_result WHERE user_id = {$student_pk_id} AND link_id = {$_SESSION['lti']['link_id']} ORDER BY created_at DESC LIMIT 1";
+                $student_result = $PDOX->allRowsDie($student_result);
+
+                $result_id = $student_result[0]['result_id'];
+                $is_submission_review = base64_encode("result_id={$result_id}&activity_id={$activity_id}&user_id={$student_pk_id}");
+
                 if (!empty($is_submission_review)) {
 
                     parse_str(base64_decode($is_submission_review), $submission_data);
