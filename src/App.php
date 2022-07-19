@@ -222,18 +222,23 @@ class App
                 header("Location: $redirect_to_studio_url");
             } else {
                 // LTI Submission Review - Canvas' Score API implementation
-                $student_id = U::get($_GET, "student_id");
-                $sql = "SELECT * FROM lti_user WHERE subject_key = '{$student_id}' LIMIT 1";
-                $student_data = $PDOX->allRowsDie($sql);
-                if (count($student_data) > 0) {
-                    $student_pk_id = $student_data[0]['user_id'];
+
+                $is_submission_review = U::get($_GET, "submission");
+                if(!$is_submission_review)
+                {
+                    $student_id = U::get($_GET, "student_id");
+                    $sql = "SELECT * FROM lti_user WHERE subject_key = '{$student_id}' LIMIT 1";
+                    $student_data = $PDOX->allRowsDie($sql);
+                    if (count($student_data) > 0) {
+                        $student_pk_id = $student_data[0]['user_id'];
+                    }
+    
+                    $student_result = "SELECT * FROM lti_result WHERE user_id = {$student_pk_id} AND link_id = {$_SESSION['lti']['link_id']} ORDER BY created_at DESC LIMIT 1";
+                    $student_result = $PDOX->allRowsDie($student_result);
+    
+                    $result_id = $student_result[0]['result_id'];
+                    $is_submission_review = base64_encode("result_id={$result_id}&activity_id={$activity_id}&user_id={$student_pk_id}");
                 }
-
-                $student_result = "SELECT * FROM lti_result WHERE user_id = {$student_pk_id} AND link_id = {$_SESSION['lti']['link_id']} ORDER BY created_at DESC LIMIT 1";
-                $student_result = $PDOX->allRowsDie($student_result);
-
-                $result_id = $student_result[0]['result_id'];
-                $is_submission_review = base64_encode("result_id={$result_id}&activity_id={$activity_id}&user_id={$student_pk_id}");
 
                 if (!empty($is_submission_review)) {
 
