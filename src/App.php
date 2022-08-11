@@ -153,7 +153,7 @@ class App
                     $lti_submission_info = base64_encode($build_review_data);
                     $extra = false;
                     if (isset($_SESSION['lti']['issuer_client'])) {
-                        $extra = [
+                        $grade_params['lti13_extra'] = [
                             'https://canvas.instructure.com/lti/submission' => [
                                 "new_submission" => true,
                                 "submission_type" => "basic_lti_launch",
@@ -167,7 +167,7 @@ class App
                     // if you don't know the data to send when creating the response
                     $response = new JsonResponse();
                     $debug_log = [];
-                    $retval = $LTI->result->gradeSend($gradetosend, $grade_params, $debug_log, $extra);
+                    $retval = $LTI->result->gradeSend($gradetosend, $grade_params, $debug_log);
                     $_SESSION['debug_log'] = $debug_log;
                     $output = '';
                     if ($retval === true) {
