@@ -94,6 +94,7 @@ class Content implements ControllerInterface
             $response = new RedirectResponse($studio_url);
             $response->send();
         } elseif (isset($_SESSION['lti']['issuer_client'])) {
+            $course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
             if (isset($_SESSION['lti']['user_email']) && !empty($_SESSION['lti']['user_email'])) {
                 $custom_email_id = $_SESSION['lti']['user_email'];
                 $full_name = explode(" ", $_SESSION['lti']['user_displayname']);
@@ -108,7 +109,6 @@ class Content implements ControllerInterface
                 $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
                 $first_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_given');
                 $last_name = ParamValidate::getKeyInCustomFields($_SESSION, 'person_name_family');
-                $course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
             }
             if (isset($_SESSION['lti_post']['placement']) && $_SESSION['lti_post']['placement'] === 'canvas_sso') {
                 $user_data = [];
