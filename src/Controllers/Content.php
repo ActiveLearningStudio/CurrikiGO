@@ -72,13 +72,12 @@ class Content implements ControllerInterface
             // handle LTI 1.0
             $custom_email_id = ParamValidate::getKeyInCustomFields($_SESSION, 'person_email_primary');
             // courseId and domain params added to achieve lrs data entry in gclass_api_data table
-            $course_id = ParamValidate::getKeyInCustomFields($_SESSION, 'course_id');
+            $course_id = $_SESSION['lti_post'][LTIConstants::CONTEXT_ID];
             $api_domain_url = ParamValidate::getKeyInCustomFields($_SESSION, 'api_domain_url');
             $course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
 
             if (empty($custom_email_id) && isset($_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY])) {
                 $custom_email_id = $_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY];
-                $course_id = $_SESSION['lti_post'][LTIConstants::CONTEXT_ID];
             }
             $oauth_consumer_key = $_SESSION['lti_post']['oauth_consumer_key'];
             $content_item_return_url = isset($_SESSION['lti_post']['content_item_return_url']) ? $_SESSION['lti_post']['content_item_return_url'] : $_SESSION['lti_post']['tool_consumer_instance_url'];
