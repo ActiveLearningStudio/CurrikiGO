@@ -78,6 +78,7 @@ class Content implements ControllerInterface
 
             if (empty($custom_email_id) && isset($_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY])) {
                 $custom_email_id = $_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY];
+                $course_id = $_SESSION['lti_post'][LTIConstants::CONTEXT_ID];
             }
             $oauth_consumer_key = $_SESSION['lti_post']['oauth_consumer_key'];
             $content_item_return_url = isset($_SESSION['lti_post']['content_item_return_url']) ? $_SESSION['lti_post']['content_item_return_url'] : $_SESSION['lti_post']['tool_consumer_instance_url'];
