@@ -49,7 +49,7 @@ class App
                 $custom_email_id = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY, false);
                 $custom_person_name_given = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_NAME_FAMILY, false);
                 $custom_person_name_family = $LTI->ltiRawParameter(LTIConstants::LIS_PERSON_NAME_GIVEN, false);
-                $custom_course_id =  $LTI->ltiRawParameter(LTIConstants::CONTEXT_ID, false);
+                $course_id =  $LTI->ltiRawParameter(LTIConstants::CONTEXT_ID, false);
                 $custom_course_code =  $LTI->ltiRawParameter(LTIConstants::CONTEXT_LABEL, false);
             }
             // $LTI->var_dump();

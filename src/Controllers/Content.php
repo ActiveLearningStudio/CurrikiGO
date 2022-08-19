@@ -80,6 +80,7 @@ class Content implements ControllerInterface
             $course_name = ParamValidate::getKeyInCustomFields($_SESSION, 'course_name');
 
             if (empty($custom_email_id) && isset($_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY])) {
+                $course_id = $_SESSION['lti_post'][LTIConstants::CONTEXT_ID];
                 $custom_email_id = $_SESSION['lti_post'][LTIConstants::LIS_PERSON_CONTACT_EMAIL_PRIMARY];
             }
             $oauth_consumer_key = $_SESSION['lti_post']['oauth_consumer_key'];
