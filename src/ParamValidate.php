@@ -53,22 +53,6 @@ class ParamValidate
         return isset($_SESSION['lti_post']) && isset($_SESSION['lti_post']['activity']) ? $_SESSION['lti_post']['activity'] : null;
     }
 
-    public static function independentActivityInCustom($session)
-    {
-        if (isset($session['tsugi_jwt'])) {
-            $lti_jwt = $session['tsugi_jwt'];
-            $lti_claim_custom_url = "https://purl.imsglobal.org/spec/lti/claim/custom";
-            $lti_claim_custom = $lti_jwt->body->{$lti_claim_custom_url};
-            return property_exists($lti_claim_custom, 'independent_activity') ? $lti_claim_custom->independent_activity : null;
-        }
-        return null;
-    }
-
-    public static function independentActivityInQueryString($session)
-    {
-        return isset($_SESSION['lti_post']) && isset($_SESSION['lti_post']['independent_activity']) ? $_SESSION['lti_post']['independent_activity'] : null;
-    }
-
     public static function toolPlatformInfo($session)
     {
         if (isset($session['tsugi_jwt'])) {
