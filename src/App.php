@@ -65,6 +65,10 @@ class App
             $project_id = ParamValidate::projectInCustom($_SESSION) ?: ParamValidate::projectInQueryString($_SESSION);
             $activity_id = ParamValidate::activityInCustom($_SESSION) ?: ParamValidate::activityInQueryString($_SESSION);
             $is_summary = U::get($_GET, "is_summary");
+            $lti_jwt = $_SESSION['tsugi_jwt'];
+            $lti_claim_custom_url = "https://purl.imsglobal.org/spec/lti/claim/custom";
+            $lti_claim_custom = $lti_jwt->body->{$lti_claim_custom_url};
+            $slideNumber = property_exists($lti_claim_custom, 'slideNumber') ? $lti_claim_custom->slideNumber : null;
             if ($project_id) {
                 $lti_token_params = http_build_query($_SESSION['lti_post']);
                 $project_studio_link = CURRIKI_STUDIO_HOST . "/project/preview2/$project_id";
@@ -214,6 +218,10 @@ class App
                     $redirect_to_studio_url .= '&' . $extra_param . '=' . urlencode($$extra_param);
                 }
                 $redirect_to_studio_url .= '&homepage=' . urlencode($CFG->wwwroot);
+                if($slideNumber){
+                    $redirect_to_studio_url .= '&slideNumber=' . $slideNumber;
+                    $redirect_to_studio_url .= '&tmps=' .  time(); 
+                }
                 $redirect_to_studio_url = addSession($redirect_to_studio_url);
                 header("Location: $redirect_to_studio_url");
             } else {
